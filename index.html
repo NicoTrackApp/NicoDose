@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#f0ecf6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="NicoDose" />
+  <title>NicoDose</title>
+  <link rel="manifest" href="manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #f0ecf6;
+      --bg2:     #f9f7fd;
+      --bg3:     #ebe5f2;
+      --bg4:     #e3dced;
+      --teal:    #8b5cf6;
+      --teal-dim:#a78bfa;
+      --teal-glow: rgba(139,92,246,0.15);
+      --amber:   #d97706;
+      --red:     #ef4444;
+      --cream:   #2d2438;
+      --muted:   #9b8fac;
+      --muted2:  #7a6d8a;
+      --border:  #ddd5ea;
+      --border2: #cec3de;
+      --success: #8b5cf6;
+      --taupe:   #b5a89c;
+      --taupe2:  #8c7b6e;
+      --mauve:   #c4b5fd;
+      --mauve2:  #7c3aed;
+      --rose:    #f0e8ff;
+    }
+
+    [data-theme="dark"] {
+      --bg:      #0e0b14;
+      --bg2:     #15111f;
+      --bg3:     #1c1728;
+      --bg4:     #231d30;
+      --teal:    #8b5cf6;
+      --teal-dim:#6d3fd6;
+      --teal-glow: rgba(139,92,246,0.2);
+      --amber:   #f59e0b;
+      --red:     #f87171;
+      --cream:   #e8e0f4;
+      --muted:   #5e5474;
+      --muted2:  #7b6d94;
+      --border:  #2a2038;
+      --border2: #352945;
+      --success: #a78bfa;
+      --taupe:   #6b5f7a;
+      --taupe2:  #8a7a9b;
+      --mauve:   #6d3fd6;
+      --mauve2:  #a78bfa;
+      --rose:    #1a1228;
+    }
+
+    html, body {
+      font-size: 16px;
+      height: 100%;
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* soft gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(196,181,253,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 85% 100%, rgba(181,168,156,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(237,232,244,0.25) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER ── */
+    header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border2);
+      background: linear-gradient(180deg, rgba(244,240,248,0.95) 0%, rgba(253,251,255,0.9) 100%);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {}
+
+    .app-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--mauve2);
+      line-height: 1;
+      text-shadow: 0 2px 12px rgba(124,58,237,0.2);
+    }
+
+    .app-sub {
+      font-size: 0.75rem;
+      color: var(--taupe);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .date-display {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--muted2);
+      letter-spacing: 0.1em;
+      line-height: 1.5;
+    }
+
+    .date-display strong {
+      display: block;
+      color: var(--cream);
+      font-size: 0.87rem;
+      font-weight: 700;
+    }
+
+    /* storage status badge */
+    .storage-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid;
+      transition: all 0.3s;
+    }
+
+    .storage-badge.ok {
+      color: var(--mauve2);
+      border-color: rgba(139,92,246,0.3);
+      background: rgba(196,181,253,0.2);
+    }
+
+    .storage-badge.saving {
+      color: var(--amber);
+      border-color: rgba(217,119,6,0.3);
+      background: rgba(217,119,6,0.08);
+    }
+
+    .storage-badge.error {
+      color: var(--red);
+      border-color: rgba(239,68,68,0.3);
+      background: rgba(239,68,68,0.08);
+    }
+
+    .storage-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .storage-badge.ok .storage-dot { animation: pulse 2.5s ease infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border2);
+      background: rgba(253,251,255,0.85);
+      backdrop-filter: blur(8px);
+      flex-shrink: 0;
+      padding: 0 8px;
+      gap: 4px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 11px 0;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .tab::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--teal), var(--mauve));
+      border-radius: 2px;
+      transition: width 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .tab.active {
+      color: var(--mauve2);
+    }
+
+    .tab.active::after { width: 60%; }
+
+    /* ── VIEWS ── */
+    .views { flex: 1; overflow: hidden; position: relative; }
+
+    .view {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .view.active { display: flex; }
+
+    .view::-webkit-scrollbar { width: 4px; }
+    .view::-webkit-scrollbar-track { background: transparent; }
+    .view::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    /* ── COUNTER BLOCK ── (hidden) */
+    .counter-block { display: none; }
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--teal);
+      border-radius: 20px;
+      padding: 28px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(139,92,246,0.1), 0 1px 4px rgba(139,92,246,0.05);
+    }
+
+    .counter-block::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 120px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(196,181,253,0.3), transparent 70%);
+      pointer-events: none;
+    }
+
+    .counter-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--taupe);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      position: relative;
+      font-weight: 500;
+    }
+
+    .counter-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 6rem;
+      color: var(--mauve2);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      text-shadow: 0 4px 24px rgba(124,58,237,0.25);
+      transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative;
+    }
+
+    .counter-number.bump { transform: scale(1.1); }
+
+    .counter-unit {
+      font-size: 0.76rem;
+      color: var(--taupe);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 6px;
+      position: relative;
+    }
+
+    /* progress bar under counter */
+    .counter-progress {
+      margin-top: 16px;
+      position: relative;
+    }
+
+    .counter-progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .counter-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--mauve), var(--mauve2));
+      border-radius: 6px;
+      transition: width 0.5s ease;
+      box-shadow: 0 0 10px rgba(139,92,246,0.4);
+    }
+
+    .counter-goal-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: var(--taupe);
+      letter-spacing: 0.1em;
+      margin-top: 6px;
+    }
+
+    /* ── BIG BUTTON ── */
+    .btn-dose {
+      position: relative;
+      width: 100%;
+      padding: 18px 24px;
+      background: linear-gradient(135deg, var(--mauve2), var(--teal));
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 6px 24px rgba(124,58,237,0.35), 0 2px 8px rgba(124,58,237,0.2);
+    }
+
+    .btn-dose::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      border-radius: 16px;
+      pointer-events: none;
+    }
+
+    .btn-dose:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(124,58,237,0.3); }
+
+    .btn-dose-text { position: relative; z-index: 1; }
+
+    .btn-icon-circle {
+      position: relative;
+      z-index: 1;
+      width: 26px;
+      height: 26px;
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-family: sans-serif;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 0.76rem;
+      letter-spacing: 0.2em;
+      color: var(--taupe2);
+      text-transform: uppercase;
+      font-weight: 600;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title-badge {
+      font-size: 0.75rem;
+      color: var(--mauve2);
+      background: rgba(196,181,253,0.3);
+      border: 1px solid rgba(139,92,246,0.2);
+      padding: 2px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+
+    /* ── DOSE LIST ── */
+    .dose-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .dose-item {
+      display: flex;
+      align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--mauve);
+      border-radius: 12px;
+      padding: 11px 14px;
+      animation: slideIn 0.22s ease;
+      gap: 12px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(139,92,246,0.06);
+    }
+
+    .dose-item:hover { border-left-color: var(--mauve2); box-shadow: 0 4px 16px rgba(139,92,246,0.12); transform: translateY(-1px); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .dose-index {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--mauve);
+      min-width: 28px;
+    }
+
+    .dose-info { flex: 1; }
+
+    .dose-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--cream);
+      letter-spacing: -0.02em;
+    }
+
+    .dose-time-seconds {
+      font-size: 0.8rem;
+      color: var(--taupe);
+    }
+
+    .dose-elapsed {
+      font-size: 0.85rem;
+      color: var(--taupe);
+      letter-spacing: 0.06em;
+      margin-top: 2px;
+    }
+
+    .dose-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dose-edit, .dose-delete {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--taupe);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 5px 8px;
+      transition: all 0.18s;
+      line-height: 1;
+      border-radius: 8px;
+    }
+
+    .dose-edit:hover { color: var(--mauve2); border-color: rgba(139,92,246,0.25); background: rgba(196,181,253,0.15); }
+    .dose-delete:hover { color: var(--red); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.06); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 32px 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      letter-spacing: 0.12em;
+    }
+
+    .empty-icon {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 12px;
+      opacity: 0.2;
+    }
+
+    /* ── EXPORT SECTION ── */
+    .export-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .btn-small {
+      flex: 1;
+      padding: 10px 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.73rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      background: var(--bg2);
+      color: var(--taupe2);
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 1px 4px rgba(139,92,246,0.06);
+    }
+
+    .btn-small:hover { border-color: var(--mauve); color: var(--mauve2); background: rgba(196,181,253,0.15); box-shadow: 0 3px 10px rgba(139,92,246,0.12); }
+    .btn-small:active { background: rgba(196,181,253,0.25); }
+
+    /* ── CALENDAR ── */
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 16px;
+      box-shadow: 0 2px 12px rgba(139,92,246,0.07);
+    }
+
+    .cal-nav button {
+      background: var(--rose);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      color: var(--mauve2);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .cal-nav button:hover { border-color: var(--mauve); background: rgba(196,181,253,0.3); }
+
+    .cal-month-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--cream);
+    }
+
+    .cal-grid-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+
+    .cal-day-name {
+      text-align: center;
+      font-size: 0.87rem;
+      letter-spacing: 0.1em;
+      color: var(--taupe);
+      padding: 5px 0;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+
+    .cal-cell {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s;
+      box-shadow: 0 1px 3px rgba(139,92,246,0.04);
+    }
+
+    .cal-cell:hover { border-color: var(--mauve); background: var(--rose); box-shadow: 0 3px 10px rgba(139,92,246,0.1); }
+    .cal-cell.empty { background: transparent; border-color: transparent; cursor: default; box-shadow: none; }
+    .cal-cell.today { border-color: var(--mauve2); background: rgba(196,181,253,0.15); }
+    .cal-cell.today .cal-cell-num { color: var(--mauve2); font-weight: 700; }
+    .cal-cell.selected { background: rgba(196,181,253,0.25); border-color: var(--mauve2); box-shadow: 0 0 0 2px rgba(139,92,246,0.2); }
+
+    .cal-cell.has-data .cal-dot {
+      width: 5px; height: 5px;
+      background: var(--mauve2);
+      border-radius: 50%;
+      position: absolute;
+      bottom: 4px;
+      box-shadow: 0 0 5px rgba(124,58,237,0.5);
+    }
+
+    .cal-cell-num {
+      font-size: 0.87rem;
+      color: var(--cream);
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .cal-cell-count {
+      font-size: 0.8rem;
+      color: var(--mauve2);
+      margin-top: 2px;
+      font-weight: 700;
+    }
+
+    /* ── DAY DETAIL ── */
+    .day-detail {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-top: 2px solid var(--mauve);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 16px rgba(139,92,246,0.08);
+    }
+
+    .day-detail-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--cream);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .day-detail-title .count-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--mauve2);
+    }
+
+    /* ── STATS ── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--mauve);
+      border-radius: 16px;
+      padding: 16px 14px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 3px 14px rgba(139,92,246,0.08);
+      transition: box-shadow 0.2s;
+    }
+
+    .stat-card:hover { box-shadow: 0 6px 20px rgba(139,92,246,0.14); }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 70px; height: 70px;
+      background: radial-gradient(circle, rgba(196,181,253,0.3), transparent 70%);
+    }
+
+    .stat-card-label {
+      font-size: 0.87rem;
+      letter-spacing: 0.18em;
+      color: var(--taupe);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .stat-card-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--mauve2);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      text-shadow: 0 2px 12px rgba(124,58,237,0.2);
+    }
+
+    .stat-card-sub {
+      font-size: 0.87rem;
+      color: var(--taupe);
+      margin-top: 3px;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── BAR CHART ── */
+    .chart-bar-container {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 3px 14px rgba(139,92,246,0.07);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .chart-title {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      color: var(--taupe);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .chart-legend {
+      font-size: 0.95rem;
+      color: var(--taupe2);
+      letter-spacing: 0.08em;
+    }
+
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 90px;
+    }
+
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .bar-fill {
+      width: 100%;
+      background: linear-gradient(180deg, rgba(196,181,253,0.5), rgba(196,181,253,0.2));
+      border-radius: 6px 6px 3px 3px;
+      border-top: 2px solid var(--mauve);
+      min-height: 3px;
+      transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative;
+    }
+
+    .bar-fill.today-bar {
+      background: linear-gradient(180deg, rgba(124,58,237,0.4), rgba(124,58,237,0.15));
+      border-top-color: var(--mauve2);
+      box-shadow: 0 -3px 10px rgba(124,58,237,0.2);
+    }
+
+    .bar-label {
+      font-size: 0.68rem;
+      color: var(--taupe);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .bar-val {
+      font-size: 0.87rem;
+      color: var(--mauve2);
+      font-weight: 700;
+      min-height: 10px;
+    }
+
+    /* trend line */
+    .trend-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.76rem;
+      color: var(--taupe2);
+      letter-spacing: 0.08em;
+      box-shadow: 0 2px 8px rgba(139,92,246,0.06);
+    }
+
+    .trend-arrow { font-size: 1rem; }
+    .trend-up { color: var(--red); }
+    .trend-down { color: var(--mauve2); }
+    .trend-flat { color: var(--amber); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(196,181,253,0.2);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-top: 3px solid var(--mauve2);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 320px;
+      padding: 28px 24px 22px;
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 20px 60px rgba(124,58,237,0.2), 0 4px 16px rgba(124,58,237,0.1);
+    }
+
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--mauve2);
+      margin-bottom: 3px;
+    }
+
+    .modal-sub {
+      font-size: 0.76rem;
+      color: var(--taupe);
+      letter-spacing: 0.1em;
+      margin-bottom: 22px;
+    }
+
+    .time-inputs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .time-field {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .time-field label {
+      font-size: 0.95rem;
+      letter-spacing: 0.12em;
+      color: var(--taupe);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .time-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .time-spinner button {
+      background: none;
+      border: none;
+      color: var(--mauve2);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 7px 16px;
+      line-height: 1;
+      transition: background 0.15s;
+      width: 100%;
+    }
+
+    .time-spinner button:hover { background: rgba(196,181,253,0.25); }
+
+    .time-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cream);
+      letter-spacing: -0.04em;
+      padding: 4px 16px;
+      min-width: 64px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      line-height: 1.25;
+    }
+
+    .time-sep {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 400;
+      color: var(--mauve);
+      margin-top: 18px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-modal {
+      flex: 1;
+      padding: 13px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      transition: all 0.15s;
+    }
+
+    .btn-modal-cancel {
+      background: var(--bg3);
+      color: var(--taupe2);
+    }
+
+    .btn-modal-cancel:hover { color: var(--cream); border-color: var(--taupe); background: var(--bg4); }
+
+    .btn-modal-confirm {
+      background: linear-gradient(135deg, var(--mauve2), var(--teal));
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+    }
+
+    .btn-modal-confirm:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.45); transform: translateY(-1px); }
+
+    /* ── CONFIRM DELETE MODAL ── */
+    #confirmModal .modal { border-top-color: var(--red); }
+    #confirmModal .modal-title { color: var(--red); }
+    .btn-modal-danger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: var(--red); }
+    .btn-modal-danger:hover { background: var(--red); color: #fff; border-color: transparent; }
+
+    /* ── FLASH ── */
+    .flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(196,181,253,0.12);
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0;
+    }
+
+    .flash.show { animation: flashAnim 0.35s ease; }
+
+    @keyframes flashAnim {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-left: 4px solid var(--mauve2);
+      border-radius: 14px;
+      color: var(--cream);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      padding: 10px 18px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+      z-index: 2000;
+      white-space: nowrap;
+      max-width: calc(100vw - 40px);
+      box-shadow: 0 8px 24px rgba(124,58,237,0.2);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── LOADING ── */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      transition: opacity 0.4s;
+    }
+
+    .loading-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--mauve2);
+      text-shadow: 0 4px 20px rgba(124,58,237,0.3);
+    }
+
+    .loading-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .loading-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--mauve);
+      border-radius: 50%;
+      animation: loadPulse 1.2s ease infinite;
+    }
+
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 5px 10px 5px 7px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--taupe2);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--mauve);
+      color: var(--mauve2);
+      background: var(--rose);
+    }
+
+    .theme-toggle-icon {
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .theme-toggle:hover .theme-toggle-icon {
+      transform: rotate(20deg);
+    }
+
+    /* dark mode background gradient override */
+    [data-theme="dark"] body::before {
+      background:
+        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(109,63,214,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 85% 100%, rgba(60,40,100,0.1) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(21,17,31,0.3) 0%, transparent 70%);
+    }
+
+    [data-theme="dark"] header {
+      background: linear-gradient(180deg, rgba(14,11,20,0.97) 0%, rgba(21,17,31,0.94) 100%);
+    }
+
+    [data-theme="dark"] .tabs {
+      background: rgba(21,17,31,0.9);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-title">NicoDose</div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+</div>
+
+<div id="app">
+
+  <header>
+    <div class="header-left">
+      <div class="app-title">NicoDose</div>
+      <div class="app-sub">Suivi des prises · Nicotine</div>
+    </div>
+    <div class="header-right">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Basculer le thème">
+          <span class="theme-toggle-icon" id="themeIcon">☀️</span>
+          <span id="themeLabel">Clair</span>
+        </button>
+        <div class="date-display" id="headerDate"></div>
+      </div>
+      <div class="storage-badge saving" id="storageBadge">
+        <div class="storage-dot"></div>
+        <span id="storageBadgeText">sync</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('today')">Aujourd'hui</button>
+    <button class="tab" onclick="switchTab('calendar')">Calendrier</button>
+    <button class="tab" onclick="switchTab('stats')">Statistiques</button>
+  </div>
+
+  <div class="views">
+
+    <!-- TODAY -->
+    <div class="view active" id="view-today">
+      <div class="counter-block">
+        <div class="counter-label">Prises aujourd'hui</div>
+        <div class="counter-number" id="counterNum">0</div>
+        <div class="counter-unit">doses enregistrées</div>
+        <div class="counter-progress">
+          <div class="counter-progress-bar">
+            <div class="counter-progress-fill" id="progressFill" style="width:0%"></div>
+          </div>
+          <div class="counter-goal-label">
+            <span>0</span>
+            <span id="goalLabel">objectif : — prises</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-dose" onclick="addDose()">
+        <div class="btn-icon-circle">+</div>
+        <span class="btn-dose-text">Enregistrer une prise</span>
+      </button>
+
+      <div class="section-title">
+        Historique du jour
+        <span class="section-title-badge" id="todayBadge">0</span>
+      </div>
+
+      <div class="dose-list" id="todayList"></div>
+
+      <div class="section-title" style="margin-top:4px">Données</div>
+      <div class="export-row">
+        <button class="btn-small" onclick="exportData()">
+          ↓ Sauvegarder
+        </button>
+        <button class="btn-small" onclick="document.getElementById('importFile').click()">
+          ↑ Importer
+        </button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="view" id="view-calendar">
+      <div class="cal-nav">
+        <button onclick="calPrev()">&#8592;</button>
+        <div class="cal-month-label" id="calMonthLabel"></div>
+        <button onclick="calNext()">&#8594;</button>
+      </div>
+
+      <div class="cal-grid-header">
+        <div class="cal-day-name">Lu</div>
+        <div class="cal-day-name">Ma</div>
+        <div class="cal-day-name">Me</div>
+        <div class="cal-day-name">Je</div>
+        <div class="cal-day-name">Ve</div>
+        <div class="cal-day-name">Sa</div>
+        <div class="cal-day-name">Di</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+
+      <div class="day-detail" id="dayDetail" style="display:none">
+        <div class="day-detail-title" id="dayDetailTitle"></div>
+        <div class="dose-list" id="dayDetailList"></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="view" id="view-stats">
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-card-label">Aujourd'hui</div>
+          <div class="stat-card-value" id="statToday">0</div>
+          <div class="stat-card-sub">prises</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Moyenne / jour</div>
+          <div class="stat-card-value" id="statAvg">0</div>
+          <div class="stat-card-sub">sur 7 jours</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Cette semaine</div>
+          <div class="stat-card-value" id="statWeek">0</div>
+          <div class="stat-card-sub">prises totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Record / jour</div>
+          <div class="stat-card-value" id="statMax">0</div>
+          <div class="stat-card-sub">prises max</div>
+        </div>
+        <div class="stat-card" style="grid-column: 1 / -1; border-top-color: var(--mauve2);">
+          <div class="stat-card-label">Délai moyen entre prises</div>
+          <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;">
+            <div class="stat-card-value" id="statInterval">—</div>
+            <div style="font-size:0.78rem; color:var(--muted2); letter-spacing:0.08em;" id="statIntervalUnit"></div>
+          </div>
+          <div class="stat-card-sub" id="statIntervalSub">—</div>
+        </div>
+      </div>
+
+      <div class="chart-bar-container">
+        <div class="chart-header">
+          <div class="chart-title">7 derniers jours</div>
+          <div class="chart-legend" id="chartLegend">—</div>
+        </div>
+        <div class="bars" id="barsChart"></div>
+      </div>
+
+      <div class="trend-indicator" id="trendIndicator">
+        <span class="trend-arrow" id="trendArrow">→</span>
+        <span id="trendText">Calcul de la tendance...</span>
+      </div>
+
+      <div class="chart-bar-container" id="dailyCurveContainer">
+        <div class="chart-header">
+          <div class="chart-title">Prises · Aujourd'hui</div>
+          <div class="chart-legend" id="dailyCurveLegend">—</div>
+        </div>
+        <svg id="dailyCurveSvg" width="100%" height="130" viewBox="0 0 300 130" preserveAspectRatio="none" style="display:block;overflow:visible"></svg>
+        <div id="dailyCurveEmpty" style="display:none; text-align:center; padding:24px 0; font-size:0.75rem; color:var(--muted); letter-spacing:0.1em;">Aucune prise enregistrée aujourd'hui</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="flash" id="flash"></div>
+<div class="toast" id="toast"></div>
+
+<!-- EDIT TIME MODAL -->
+<div class="modal-overlay" id="editModal" onclick="closeEditModal(event)">
+  <div class="modal">
+    <div class="modal-title">Modifier l'heure</div>
+    <div class="modal-sub" id="modalSub">Prise #01</div>
+    <div class="time-inputs">
+      <div class="time-field">
+        <label>Heures</label>
+        <div class="time-spinner">
+          <button onclick="spinTime('h', 1)">▲</button>
+          <div class="time-val" id="editH">00</div>
+          <button onclick="spinTime('h', -1)">▼</button>
+        </div>
+      </div>
+      <div class="time-sep">:</div>
+      <div class="time-field">
+        <label>Minutes</label>
+        <div class="time-spinner">
+          <button onclick="spinTime('m', 1)">▲</button>
+          <div class="time-val" id="editM">00</div>
+          <button onclick="spinTime('m', -1)">▼</button>
+        </div>
+      </div>
+      <div class="time-sep">:</div>
+      <div class="time-field">
+        <label>Secondes</label>
+        <div class="time-spinner">
+          <button onclick="spinTime('s', 1)">▲</button>
+          <div class="time-val" id="editS">00</div>
+          <button onclick="spinTime('s', -1)">▼</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-modal-cancel" onclick="closeEditModal()">Annuler</button>
+      <button class="btn-modal btn-modal-confirm" onclick="confirmEdit()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-overlay" id="confirmModal" onclick="closeConfirmModal(event)">
+  <div class="modal">
+    <div class="modal-title">Supprimer</div>
+    <div class="modal-sub" id="confirmModalSub">Confirmer la suppression ?</div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-modal-cancel" onclick="closeConfirmModal()">Annuler</button>
+      <button class="btn-modal btn-modal-danger" id="confirmDeleteBtn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STORAGE (persistent via window.storage API) ──────────────
+  const STORAGE_KEY = 'nicodose_data_v1';
+  const GOAL = 10; // daily goal (doses before warning color)
+
+  let appData = {};
+  let storageAvailable = false;
+
+  async function loadData() {
+    try {
+      const result = await window.storage.get(STORAGE_KEY);
+      if (result && result.value) {
+        appData = JSON.parse(result.value);
+      } else {
+        // Try migrating from localStorage
+        const legacy = localStorage.getItem('nicodose_v1');
+        if (legacy) {
+          appData = JSON.parse(legacy);
+          await saveData(); // migrate
+          showToast('Données migrées depuis le stockage local');
+        } else {
+          appData = {};
+        }
+      }
+      storageAvailable = true;
+      setBadge('ok', 'Sauvegardé');
+    } catch (e) {
+      // Fallback: localStorage
+      storageAvailable = false;
+      setBadge('error', 'Local');
+      try { appData = JSON.parse(localStorage.getItem('nicodose_v1')) || {}; }
+      catch { appData = {}; }
+    }
+    return appData;
+  }
+
+  async function saveData() {
+    setBadge('saving', 'Sauvegarde...');
+    try {
+      if (storageAvailable) {
+        await window.storage.set(STORAGE_KEY, JSON.stringify(appData));
+        setBadge('ok', 'Sauvegardé');
+      } else {
+        localStorage.setItem('nicodose_v1', JSON.stringify(appData));
+        setBadge('error', 'Local');
+      }
+    } catch (e) {
+      // fallback to localStorage
+      localStorage.setItem('nicodose_v1', JSON.stringify(appData));
+      setBadge('error', 'Local');
+    }
+  }
+
+  function setBadge(state, text) {
+    const badge = document.getElementById('storageBadge');
+    const label = document.getElementById('storageBadgeText');
+    badge.className = 'storage-badge ' + state;
+    label.textContent = text;
+  }
+
+  // ── KEYS ──────────────────────────────────────────────────────
+  function todayKey() { return dateKey(new Date()); }
+
+  function dateKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  // ── DOSE ─────────────────────────────────────────────────────
+  // ── SOUND ──────────────────────────────────────────────────────
+  function playDoseSound() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const t = ctx.currentTime;
+
+      // Two soft tones — a quick ascending "ding"
+      const freqs = [660, 880];
+      freqs.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + i * 0.1);
+
+        gain.gain.setValueAtTime(0, t + i * 0.1);
+        gain.gain.linearRampToValueAtTime(0.18, t + i * 0.1 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.1 + 0.28);
+
+        osc.start(t + i * 0.1);
+        osc.stop(t + i * 0.1 + 0.3);
+      });
+    } catch (e) { /* silently ignore if AudioContext unavailable */ }
+  }
+
+  async function addDose() {
+    playDoseSound();
+    const key = todayKey();
+    if (!appData[key]) appData[key] = [];
+    const now = new Date();
+    appData[key].push({ h: now.getHours(), m: now.getMinutes(), s: now.getSeconds(), ts: now.getTime() });
+    await saveData();
+
+    const flash = document.getElementById('flash');
+    flash.classList.remove('show');
+    void flash.offsetWidth;
+    flash.classList.add('show');
+
+    const num = document.getElementById('counterNum');
+    num.classList.remove('bump');
+    void num.offsetWidth;
+    num.classList.add('bump');
+    setTimeout(() => num.classList.remove('bump'), 200);
+
+    renderToday();
+    renderStats();
+    showToast('Prise enregistrée');
+  }
+
+  let pendingDelete = null;
+
+  function confirmDeleteDose(key, idx) {
+    pendingDelete = { key, idx };
+    document.getElementById('confirmModalSub').textContent = `Supprimer la prise #${String(idx+1).padStart(2,'0')} ?`;
+    document.getElementById('confirmDeleteBtn').onclick = executeDeletion;
+    document.getElementById('confirmModal').classList.add('open');
+  }
+
+  function closeConfirmModal(e) {
+    if (e && e.target !== document.getElementById('confirmModal')) return;
+    document.getElementById('confirmModal').classList.remove('open');
+    pendingDelete = null;
+  }
+
+  async function executeDeletion() {
+    if (!pendingDelete) return;
+    const { key, idx } = pendingDelete;
+    if (!appData[key]) return;
+    appData[key].splice(idx, 1);
+    if (appData[key].length === 0) delete appData[key];
+    await saveData();
+    document.getElementById('confirmModal').classList.remove('open');
+    pendingDelete = null;
+    renderToday();
+    renderStats();
+    if (calSelectedDay) renderDayDetail(calSelectedDay);
+    renderCalendar();
+    showToast('Prise supprimée');
+  }
+
+  // ── FORMAT ────────────────────────────────────────────────────
+  function formatTime(d) {
+    return `${String(d.h).padStart(2,'0')}:${String(d.m).padStart(2,'0')}`;
+  }
+
+  function formatTimeFull(d) {
+    return `${String(d.h).padStart(2,'0')}:${String(d.m).padStart(2,'0')}:${String(d.s).padStart(2,'0')}`;
+  }
+
+  function formatElapsed(ts) {
+    const diff = Math.floor((Date.now() - ts) / 60000);
+    if (diff < 1) return 'à l\'instant';
+    if (diff < 60) return `il y a ${diff} min`;
+    const h = Math.floor(diff / 60);
+    const m = diff % 60;
+    return `il y a ${h}h${m > 0 ? String(m).padStart(2,'0') : ''}`;
+  }
+
+  function buildDoseItem(dose, key, idx) {
+    const item = document.createElement('div');
+    item.className = 'dose-item';
+    const isToday = key === todayKey();
+    item.innerHTML = `
+      <div class="dose-index">#${String(idx+1).padStart(2,'0')}</div>
+      <div class="dose-info">
+        <div class="dose-time">${formatTime(dose)}<span class="dose-time-seconds">:${String(dose.s).padStart(2,'0')}</span></div>
+        ${isToday && dose.ts ? `<div class="dose-elapsed">${formatElapsed(dose.ts)}</div>` : ''}
+      </div>
+      <div class="dose-actions">
+        <button class="dose-edit" onclick="openEditModal('${key}', ${idx})" title="Modifier">✎</button>
+        <button class="dose-delete" onclick="confirmDeleteDose('${key}', ${idx})" title="Supprimer">✕</button>
+      </div>
+    `;
+    return item;
+  }
+
+  // ── EDIT MODAL ────────────────────────────────────────────────
+  let editCtx = { key: null, idx: null, h: 0, m: 0, s: 0 };
+
+  function openEditModal(key, idx) {
+    const dose = appData[key][idx];
+    editCtx = { key, idx, h: dose.h, m: dose.m, s: dose.s };
+    document.getElementById('modalSub').textContent = `Prise #${String(idx+1).padStart(2,'0')} · ${key}`;
+    document.getElementById('editH').textContent = String(editCtx.h).padStart(2,'0');
+    document.getElementById('editM').textContent = String(editCtx.m).padStart(2,'0');
+    document.getElementById('editS').textContent = String(editCtx.s).padStart(2,'0');
+    document.getElementById('editModal').classList.add('open');
+  }
+
+  function closeEditModal(e) {
+    if (e && e.target !== document.getElementById('editModal')) return;
+    document.getElementById('editModal').classList.remove('open');
+  }
+
+  function spinTime(field, delta) {
+    if (field === 'h') {
+      editCtx.h = (editCtx.h + delta + 24) % 24;
+      document.getElementById('editH').textContent = String(editCtx.h).padStart(2,'0');
+    } else if (field === 'm') {
+      editCtx.m = (editCtx.m + delta + 60) % 60;
+      document.getElementById('editM').textContent = String(editCtx.m).padStart(2,'0');
+    } else {
+      editCtx.s = (editCtx.s + delta + 60) % 60;
+      document.getElementById('editS').textContent = String(editCtx.s).padStart(2,'0');
+    }
+  }
+
+  async function confirmEdit() {
+    const { key, idx, h, m, s } = editCtx;
+    if (!appData[key] || !appData[key][idx]) return;
+    appData[key][idx].h = h;
+    appData[key][idx].m = m;
+    appData[key][idx].s = s;
+    const [y, mo, d] = key.split('-');
+    appData[key][idx].ts = new Date(parseInt(y), parseInt(mo)-1, parseInt(d), h, m, s).getTime();
+    await saveData();
+    document.getElementById('editModal').classList.remove('open');
+    renderToday();
+    renderStats();
+    if (calSelectedDay) renderDayDetail(calSelectedDay);
+    renderCalendar();
+    showToast('Heure modifiée');
+  }
+
+  // ── TODAY VIEW ────────────────────────────────────────────────
+  function renderToday() {
+    const key = todayKey();
+    const doses = appData[key] || [];
+
+    document.getElementById('counterNum').textContent = doses.length;
+    document.getElementById('todayBadge').textContent = doses.length;
+
+    // progress bar
+    const pct = Math.min((doses.length / GOAL) * 100, 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('goalLabel').textContent = `objectif : ${GOAL} prises`;
+
+    const list = document.getElementById('todayList');
+    list.innerHTML = '';
+
+    if (doses.length === 0) {
+      list.innerHTML = `<div class="empty-state"><span class="empty-icon">◎</span>Aucune prise enregistrée aujourd'hui</div>`;
+      return;
+    }
+
+    [...doses].reverse().forEach((dose, ri) => {
+      const origIdx = doses.length - 1 - ri;
+      list.appendChild(buildDoseItem(dose, key, origIdx));
+    });
+  }
+
+  // ── HEADER DATE ───────────────────────────────────────────────
+  function updateHeaderDate() {
+    const now = new Date();
+    const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    document.getElementById('headerDate').innerHTML =
+      `${days[now.getDay()]}<strong>${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}</strong>`;
+  }
+
+  // ── CALENDAR ──────────────────────────────────────────────────
+  let calYear, calMonth, calSelectedDay = null;
+
+  function calInit() {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    renderCalendar();
+  }
+
+  function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+  function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+
+  function renderCalendar() {
+    const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    document.getElementById('calMonthLabel').textContent = `${months[calMonth]} ${calYear}`;
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    const firstDay = new Date(calYear, calMonth, 1);
+    let startDow = firstDay.getDay();
+    startDow = (startDow === 0) ? 6 : startDow - 1;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const todayStr = dateKey(new Date());
+
+    for (let i = 0; i < startDow; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell empty';
+      grid.appendChild(cell);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const doses = appData[key] || [];
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell';
+      if (key === todayStr) cell.classList.add('today');
+      if (calSelectedDay === key) cell.classList.add('selected');
+      if (doses.length > 0) cell.classList.add('has-data');
+      cell.innerHTML = `<div class="cal-cell-num">${d}</div>${doses.length > 0 ? `<div class="cal-cell-count">${doses.length}</div>` : ''}<div class="cal-dot"></div>`;
+      cell.addEventListener('click', () => {
+        calSelectedDay = key;
+        renderCalendar();
+        renderDayDetail(key);
+      });
+      grid.appendChild(cell);
+    }
+  }
+
+  function renderDayDetail(key) {
+    const doses = appData[key] || [];
+    const detail = document.getElementById('dayDetail');
+    const title = document.getElementById('dayDetailTitle');
+    const list = document.getElementById('dayDetailList');
+    const [y, m, d] = key.split('-');
+    const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    title.innerHTML = `${d} ${months[parseInt(m)-1]} ${y} <span class="count-pill">${doses.length}</span>`;
+    list.innerHTML = '';
+    if (doses.length === 0) {
+      list.innerHTML = `<div class="empty-state" style="padding:12px 0"><span class="empty-icon" style="font-size:1.2rem">◎</span>Aucune prise ce jour</div>`;
+    } else {
+      [...doses].reverse().forEach((dose, ri) => {
+        const origIdx = doses.length - 1 - ri;
+        list.appendChild(buildDoseItem(dose, key, origIdx));
+      });
+    }
+    detail.style.display = 'block';
+  }
+
+  // ── STATS ─────────────────────────────────────────────────────
+  function renderStats() {
+    const today = new Date();
+    const key = dateKey(today);
+    const todayDoses = (appData[key] || []).length;
+
+    let weekTotal = 0, weekData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const k = dateKey(d);
+      const count = (appData[k] || []).length;
+      weekTotal += count;
+      weekData.push({ key: k, count, date: d, isToday: i === 0 });
+    }
+
+    const avg = weekTotal > 0 ? Math.round(weekTotal / 7 * 10) / 10 : 0;
+    let maxDay = 0;
+    Object.values(appData).forEach(v => { if (Array.isArray(v) && v.length > maxDay) maxDay = v.length; });
+
+    document.getElementById('statToday').textContent = todayDoses;
+    document.getElementById('statAvg').textContent = avg;
+    document.getElementById('statWeek').textContent = weekTotal;
+    document.getElementById('statMax').textContent = maxDay;
+    document.getElementById('chartLegend').textContent = `moy. ${avg}/j`;
+
+    // Average interval between doses
+    function avgIntervalForDay(doses) {
+      if (!doses || doses.length < 2) return null;
+      const sorted = [...doses].sort((a, b) => a.ts - b.ts);
+      let total = 0;
+      for (let i = 1; i < sorted.length; i++) total += sorted[i].ts - sorted[i-1].ts;
+      return total / (sorted.length - 1) / 60000; // minutes
+    }
+
+    function formatMinutes(mins) {
+      if (mins < 60) return { value: Math.round(mins), unit: 'min entre chaque prise' };
+      const h = Math.floor(mins / 60);
+      const m = Math.round(mins % 60);
+      return { value: `${h}h${m > 0 ? String(m).padStart(2,'0') : ''}`, unit: 'entre chaque prise' };
+    }
+
+    // Today's interval
+    const todayInterval = avgIntervalForDay(appData[key]);
+
+    // 7-day global interval (all doses across the week merged by timestamp order per day)
+    let weekIntervals = [];
+    weekData.forEach(({ key: k }) => {
+      const iv = avgIntervalForDay(appData[k]);
+      if (iv !== null) weekIntervals.push(iv);
+    });
+    const weekAvgInterval = weekIntervals.length > 0
+      ? weekIntervals.reduce((s, v) => s + v, 0) / weekIntervals.length
+      : null;
+
+    const ivEl = document.getElementById('statInterval');
+    const ivUnit = document.getElementById('statIntervalUnit');
+    const ivSub = document.getElementById('statIntervalSub');
+
+    if (todayInterval !== null) {
+      const fmt = formatMinutes(todayInterval);
+      ivEl.textContent = fmt.value;
+      ivUnit.textContent = fmt.unit;
+      if (weekAvgInterval !== null) {
+        const wFmt = formatMinutes(weekAvgInterval);
+        ivSub.textContent = `moy. semaine : ${wFmt.value} ${wFmt.unit}`;
+      } else {
+        ivSub.textContent = `basé sur ${(appData[key] || []).length} prises aujourd'hui`;
+      }
+    } else {
+      ivEl.textContent = '—';
+      ivUnit.textContent = '';
+      ivSub.textContent = 'pas assez de données (min. 2 prises)';
+    }
+
+    // Bars
+    const maxCount = Math.max(...weekData.map(d => d.count), 1);
+    const bars = document.getElementById('barsChart');
+    bars.innerHTML = '';
+    const dayLetters = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
+
+    weekData.forEach(({ count, date, isToday }) => {
+      const pct = (count / maxCount) * 100;
+      const dow = date.getDay();
+      const label = dayLetters[(dow === 0) ? 6 : dow - 1];
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      col.innerHTML = `
+        <div class="bar-val">${count > 0 ? count : ''}</div>
+        <div class="bar-fill${isToday ? ' today-bar' : ''}" style="height:${Math.max(pct, 3)}%"></div>
+        <div class="bar-label">${label}</div>
+      `;
+      bars.appendChild(col);
+    });
+
+    // Trend
+    const first3 = weekData.slice(0, 3).reduce((s, d) => s + d.count, 0) / 3;
+    const last3  = weekData.slice(4, 7).reduce((s, d) => s + d.count, 0) / 3;
+    const diff = last3 - first3;
+    const trendArrow = document.getElementById('trendArrow');
+    const trendText  = document.getElementById('trendText');
+    if (diff > 0.5) {
+      trendArrow.textContent = '↑';
+      trendArrow.className = 'trend-arrow trend-up';
+      trendText.textContent = `En hausse · +${diff.toFixed(1)} prises/j vs début de semaine`;
+    } else if (diff < -0.5) {
+      trendArrow.textContent = '↓';
+      trendArrow.className = 'trend-arrow trend-down';
+      trendText.textContent = `En baisse · ${diff.toFixed(1)} prises/j vs début de semaine`;
+    } else {
+      trendArrow.textContent = '→';
+      trendArrow.className = 'trend-arrow trend-flat';
+      trendText.textContent = `Stable · consommation régulière cette semaine`;
+    }
+    renderDailyCurve(appData[key] || []);
+  }
+
+  function renderDailyCurve(doses) {
+    const svg     = document.getElementById('dailyCurveSvg');
+    const empty   = document.getElementById('dailyCurveEmpty');
+    const legend  = document.getElementById('dailyCurveLegend');
+
+    if (!doses || doses.length === 0) {
+      svg.style.display = 'none';
+      empty.style.display = 'block';
+      legend.textContent = '—';
+      return;
+    }
+    svg.style.display = 'block';
+    empty.style.display = 'none';
+
+    // Build cumulative data: one point per dose sorted by time
+    const sorted = [...doses].sort((a, b) => a.ts - b.ts);
+    const W = 300, H = 130;
+    const PAD = { top: 14, right: 16, bottom: 28, left: 30 };
+    const iW = W - PAD.left - PAD.right;
+    const iH = H - PAD.top - PAD.bottom;
+
+    // X axis: time range (first dose to last, or full day if only 1)
+    const firstTs = sorted[0].ts;
+    const lastTs  = sorted[sorted.length - 1].ts;
+    // Add a small margin so first/last points aren't clipped
+    const span = Math.max(lastTs - firstTs, 60 * 60 * 1000); // min 1h span
+    const xMin = firstTs - span * 0.05;
+    const xMax = lastTs  + span * 0.05;
+    const xRange = xMax - xMin;
+
+    // Points: cumulative count at each dose timestamp
+    const points = sorted.map((d, i) => ({
+      ts: d.ts,
+      count: i + 1,
+      label: `${String(d.h).padStart(2,'0')}:${String(d.m).padStart(2,'0')}`
+    }));
+    const maxCount = points[points.length - 1].count;
+
+    const toX = ts => PAD.left + ((ts - xMin) / xRange) * iW;
+    const toY = c  => PAD.top + iH - (c / maxCount) * iH;
+
+    // Build SVG step-line path (staircase = horizontal then vertical)
+    let pathD = `M ${toX(points[0].ts).toFixed(1)} ${toY(0).toFixed(1)}`;
+    pathD += ` L ${toX(points[0].ts).toFixed(1)} ${toY(points[0].count).toFixed(1)}`;
+    for (let i = 1; i < points.length; i++) {
+      const px = toX(points[i].ts).toFixed(1);
+      const py = toY(points[i].count).toFixed(1);
+      const prevY = toY(points[i - 1].count).toFixed(1);
+      pathD += ` L ${px} ${prevY} L ${px} ${py}`;
+    }
+    // Extend last segment to right edge
+    const lastX = toX(xMax).toFixed(1);
+    pathD += ` L ${lastX} ${toY(maxCount).toFixed(1)}`;
+
+    // Fill area path
+    const fillD = pathD
+      + ` L ${lastX} ${toY(0).toFixed(1)}`
+      + ` L ${toX(xMin).toFixed(1)} ${toY(0).toFixed(1)} Z`;
+
+    // X-axis tick labels (2-3 times)
+    const tickCount = Math.min(sorted.length, 4);
+    const tickIdxs = tickCount <= 1
+      ? [0]
+      : Array.from({ length: tickCount }, (_, i) => Math.round(i * (sorted.length - 1) / (tickCount - 1)));
+    const ticksHtml = [...new Set(tickIdxs)].map(i => {
+      const p = points[i];
+      const x = toX(p.ts);
+      return `<text x="${x.toFixed(1)}" y="${(H - 6).toFixed(1)}" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="Inter,sans-serif" letter-spacing="0.5">${p.label}</text>`;
+    }).join('');
+
+    // Y-axis ticks
+    const yTicks = maxCount <= 4
+      ? Array.from({ length: maxCount }, (_, i) => i + 1)
+      : [1, Math.ceil(maxCount / 2), maxCount];
+    const yTicksHtml = yTicks.map(c =>
+      `<line x1="${PAD.left - 3}" y1="${toY(c).toFixed(1)}" x2="${PAD.left}" y2="${toY(c).toFixed(1)}" stroke="var(--border2)" stroke-width="0.5"/>
+       <text x="${(PAD.left - 5).toFixed(1)}" y="${(toY(c) + 3).toFixed(1)}" text-anchor="end" fill="var(--muted)" font-size="7" font-family="Inter,sans-serif">${c}</text>`
+    ).join('');
+
+    // Dot markers for each dose
+    const dotsHtml = points.map(p =>
+      `<circle cx="${toX(p.ts).toFixed(1)}" cy="${toY(p.count).toFixed(1)}" r="2.5" fill="var(--mauve2)" stroke="var(--bg2)" stroke-width="1.5"/>`
+    ).join('');
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="curveGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--mauve2)" stop-opacity="0.28"/>
+          <stop offset="100%" stop-color="var(--mauve2)" stop-opacity="0.03"/>
+        </linearGradient>
+      </defs>
+      <!-- axes -->
+      <line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${PAD.top + iH}" stroke="var(--border2)" stroke-width="0.75"/>
+      <line x1="${PAD.left}" y1="${PAD.top + iH}" x2="${PAD.left + iW}" y2="${PAD.top + iH}" stroke="var(--border2)" stroke-width="0.75"/>
+      <!-- y grid lines -->
+      ${yTicks.map(c => `<line x1="${PAD.left}" y1="${toY(c).toFixed(1)}" x2="${PAD.left + iW}" y2="${toY(c).toFixed(1)}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>`).join('')}
+      <!-- fill area -->
+      <path d="${fillD}" fill="url(#curveGrad)"/>
+      <!-- step line -->
+      <path d="${pathD}" fill="none" stroke="var(--mauve2)" stroke-width="1.8" stroke-linejoin="round"/>
+      <!-- y ticks -->
+      ${yTicksHtml}
+      <!-- x labels -->
+      ${ticksHtml}
+      <!-- dots -->
+      ${dotsHtml}
+    `;
+
+    legend.textContent = `${maxCount} prise${maxCount > 1 ? 's' : ''} · ${points[0].label} → ${points[points.length - 1].label}`;
+  }
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      const names = ['today','calendar','stats'];
+      t.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.view').forEach(v => {
+      v.classList.toggle('active', v.id === `view-${name}`);
+    });
+    if (name === 'calendar') renderCalendar();
+    if (name === 'stats') renderStats();
+  }
+
+  // ── EXPORT / IMPORT ───────────────────────────────────────────
+  function exportData() {
+    const json = JSON.stringify(appData, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nicodose_${todayKey()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Export téléchargé');
+  }
+
+  async function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      // Merge: prefer imported data but keep existing days not in file
+      Object.assign(appData, parsed);
+      await saveData();
+      renderToday();
+      renderCalendar();
+      renderStats();
+      showToast(`Import réussi · ${Object.keys(parsed).length} jours chargés`);
+    } catch (e) {
+      showToast('Erreur lors de l\'import');
+    }
+    event.target.value = '';
+  }
+
+  // ── THEME TOGGLE ──────────────────────────────────────────────
+  function toggleTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme === 'dark' ? 'dark' : '');
+    const icon = document.getElementById('themeIcon');
+    const label = document.getElementById('themeLabel');
+    if (newTheme === 'dark') {
+      icon.textContent = '🌙';
+      label.textContent = 'Sombre';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0e0b14');
+    } else {
+      icon.textContent = '☀️';
+      label.textContent = 'Clair';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f0ecf6');
+    }
+    try { localStorage.setItem('nicodose_theme', newTheme); } catch(e) {}
+  }
+
+  // Restore saved theme
+  try {
+    const saved = localStorage.getItem('nicodose_theme');
+    if (saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('themeIcon').textContent = '🌙';
+      document.getElementById('themeLabel').textContent = 'Sombre';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0e0b14');
+    }
+  } catch(e) {}
+
+  // ── INIT ──────────────────────────────────────────────────────
+  async function init() {
+    updateHeaderDate();
+    setInterval(updateHeaderDate, 30000);
+
+    await loadData();
+
+    renderToday();
+    calInit();
+    renderStats();
+
+    // Hide loading
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.style.display = 'none', 400);
+  }
+
+  init();
+</script>
+</body>
+</html>
